@@ -1,0 +1,3 @@
+LIBRARY "ExampleLibrary32"
+EXPORTS
+    ExampleLibraryHello
