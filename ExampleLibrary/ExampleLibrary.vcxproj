@@ -47,7 +47,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>ExampleLibrary32d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>ExampleLibrary.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -65,7 +65,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>ExampleLibrary64d.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>ExampleLibrary.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,7 +87,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>ExampleLibrary32.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>ExampleLibrary.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -109,7 +109,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>ExampleLibrary64.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>ExampleLibrary.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -124,10 +124,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ExampleLibrary32.def" />
-    <None Include="ExampleLibrary32d.def" />
-    <None Include="ExampleLibrary64.def" />
-    <None Include="ExampleLibrary64d.def" />
+    <None Include="ExampleLibrary.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

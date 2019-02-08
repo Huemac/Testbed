@@ -1,3 +1,0 @@
-LIBRARY "ExampleLibrary32d"
-EXPORTS
-    ExampleLibraryHello
