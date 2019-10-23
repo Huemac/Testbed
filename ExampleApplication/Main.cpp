@@ -11,8 +11,6 @@ int wmain(/*int argc, wchar_t* argv[], wchar_t* envp[]*/)
         Timer timer;
 
         ExampleLibraryHello();
-
-        // TODO: Enter your code here!
     }
 
     return 0;
