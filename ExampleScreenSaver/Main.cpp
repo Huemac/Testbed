@@ -5,13 +5,12 @@
 
 namespace
 {
-    constexpr UINT FPS = 60;
-    UINT ElapsedTime = 0;
-    UINT_PTR Timer = 0;
+    UINT g_elapsedTime = 0;
+    UINT_PTR g_timer = 0;
 
     inline BYTE FunkyColor(int offset)
     {
-        return static_cast<BYTE>(std::sin(0.01 * ElapsedTime + offset) * 127 + 128);
+        return static_cast<BYTE>(std::sin(0.01 * g_elapsedTime + offset) * 127 + 128);
     }
 
     inline HBRUSH FunkyBrush()
@@ -35,28 +34,34 @@ LRESULT WINAPI ScreenSaverProc(HWND window, UINT message, WPARAM wParam, LPARAM 
     switch (message)
     {
         case WM_CREATE:
-            Timer = SetTimer(window, 1, 1000 / FPS, nullptr);
+        {
+            constexpr UINT framesPerSecond = 60;
+            g_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
             break;
-
+        }
         case WM_TIMER:
         {
-            ++ElapsedTime;
+            ++g_elapsedTime;
             HDC deviceContext = GetDC(window);
             RECT clientRectangle = { 0 };
             GetClientRect(window, &clientRectangle);
-            FillRect(deviceContext, &clientRectangle, FunkyBrush());
+            HBRUSH brush = FunkyBrush();
+            FillRect(deviceContext, &clientRectangle, brush);
+            DeleteObject(brush);
             ReleaseDC(window, deviceContext);
-            break;
+            return 0L;
         }
 
         case WM_DESTROY:
-            if (Timer)
+        {
+            if (g_timer)
             {
-                KillTimer(window, Timer);
+                KillTimer(window, g_timer);
             }
 
             PostQuitMessage(0);
             break;
+        }
     }
 
     return DefScreenSaverProc(window, message, wParam, lParam);

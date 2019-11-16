@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleApplication", "ExampleApplication\ExampleApplication.vcxproj", "{73CC5444-3BCA-487D-AD56-33693AEC4FA2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleConsoleApplication", "ExampleConsoleApplication\ExampleConsoleApplication.vcxproj", "{73CC5444-3BCA-487D-AD56-33693AEC4FA2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BA33CAF0-D18B-4F28-B943-BE34C2CBB594}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,11 +14,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Testbed.props = Testbed.props
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleLibrary", "ExampleLibrary\ExampleLibrary.vcxproj", "{395094F5-40F7-4B72-ACFD-AE8FAE501A57}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleSharedLibrary", "ExampleSharedLibrary\ExampleSharedLibrary.vcxproj", "{395094F5-40F7-4B72-ACFD-AE8FAE501A57}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleService", "ExampleService\ExampleService.vcxproj", "{3C3D7D94-F627-4538-96F1-0831BEFD28A9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleScreenSaver", "ExampleScreenSaver\ExampleScreenSaver.vcxproj", "{B502CE3E-371D-4A0A-ACDB-3380AFED9C5C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleStaticLibrary", "ExampleStaticLibrary\ExampleStaticLibrary.vcxproj", "{622397F5-66C0-4866-A67F-AE827DFA4C03}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleDesktopApplication", "ExampleDesktopApplication\ExampleDesktopApplication.vcxproj", "{AC5131A8-165D-4372-8873-B49629712D39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +64,22 @@ Global
 		{B502CE3E-371D-4A0A-ACDB-3380AFED9C5C}.Release|x64.Build.0 = Release|x64
 		{B502CE3E-371D-4A0A-ACDB-3380AFED9C5C}.Release|x86.ActiveCfg = Release|Win32
 		{B502CE3E-371D-4A0A-ACDB-3380AFED9C5C}.Release|x86.Build.0 = Release|Win32
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Debug|x64.ActiveCfg = Debug|x64
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Debug|x64.Build.0 = Debug|x64
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Debug|x86.ActiveCfg = Debug|Win32
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Debug|x86.Build.0 = Debug|Win32
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Release|x64.ActiveCfg = Release|x64
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Release|x64.Build.0 = Release|x64
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Release|x86.ActiveCfg = Release|Win32
+		{622397F5-66C0-4866-A67F-AE827DFA4C03}.Release|x86.Build.0 = Release|Win32
+		{AC5131A8-165D-4372-8873-B49629712D39}.Debug|x64.ActiveCfg = Debug|x64
+		{AC5131A8-165D-4372-8873-B49629712D39}.Debug|x64.Build.0 = Debug|x64
+		{AC5131A8-165D-4372-8873-B49629712D39}.Debug|x86.ActiveCfg = Debug|Win32
+		{AC5131A8-165D-4372-8873-B49629712D39}.Debug|x86.Build.0 = Debug|Win32
+		{AC5131A8-165D-4372-8873-B49629712D39}.Release|x64.ActiveCfg = Release|x64
+		{AC5131A8-165D-4372-8873-B49629712D39}.Release|x64.Build.0 = Release|x64
+		{AC5131A8-165D-4372-8873-B49629712D39}.Release|x86.ActiveCfg = Release|Win32
+		{AC5131A8-165D-4372-8873-B49629712D39}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

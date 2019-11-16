@@ -1,28 +1,25 @@
 #include "PCH.hpp"
-#include "ExampleLibrary.h"
-
-#include <random>
+#include "ExampleSharedLibrary.h"
 
 namespace
 {
-    const SHORT Width = 0x60;
-    const SHORT Height = 0x20;
-    const SMALL_RECT WindowSize = { 0, 0, Width - 1, Height - 1 };
-    const COORD BufferSize = { Width, Height };
-    const COORD CharacterBufferSize = { Width, Height };
-    const COORD CharacterPosition = { 0, 0 };
-
-    std::random_device RandomDevice;
-    std::default_random_engine RandomEngine(RandomDevice());
+    constexpr SHORT Width = 0x60;
+    constexpr SHORT Height = 0x20;
+    constexpr SMALL_RECT WindowSize = { 0, 0, Width - 1, Height - 1 };
+    constexpr COORD BufferSize = { Width, Height };
+    constexpr COORD CharacterBufferSize = { Width, Height };
+    constexpr COORD CharacterPosition = { 0, 0 };
 
     WORD RandomColor()
     {
-        static std::uniform_int_distribution<WORD> distribution(0, 256);
-        return distribution(RandomEngine);
+        static std::random_device randomDevice;
+        static std::default_random_engine randomEngine(randomDevice());
+        static const std::uniform_int_distribution<WORD> distribution(0, 256);
+        return distribution(randomEngine);
     }
 }
 
-void __stdcall ExampleLibraryHello()
+void __stdcall ExampleSharedLibraryHello()
 {
     SetConsoleTitle(L"HELLO WORLD!");
 
