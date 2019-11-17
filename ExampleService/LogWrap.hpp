@@ -9,7 +9,9 @@ public:
     template<std::size_t N>
     LogWrap(const wchar_t(&function)[N], int line)
     {
-        m_buffer << function << ':' << line << L": ";
+        const auto now = std::chrono::system_clock::now();
+        const auto since = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+        m_buffer << since.count() << L' ' << function << L':' << line << L": ";
     }
 
     inline ~LogWrap()

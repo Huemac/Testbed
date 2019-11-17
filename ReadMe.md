@@ -1,6 +1,14 @@
 # Testbed
 
-- A generic testbed to fool around, contains an executable, a dynamic link library (consumed by the exe), a service and a screen saver
+- A generic testbed to fool around
+- Contains all kinds of Windows binaries e.g.
+	- Console application (CLI, .exe)
+	- Desktop application (GUI, .exe)
+	- Screen saver (.scr)
+	- Service (.exe)
+	- Shared library (.dll)
+	- Static library (.lib)
+
 - Relatively clean and simple templates to start working on a project
 
 ## Prerequisites

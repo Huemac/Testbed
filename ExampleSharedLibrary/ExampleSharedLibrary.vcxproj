@@ -15,8 +15,8 @@
     <ClInclude Include="PCH.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C-ComplianceDummy.c" >
-        <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    <ClCompile Include="C-ComplianceDummy.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ExampleSharedLibrary.cpp" />
@@ -26,5 +26,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ExampleSharedLibrary.def" />
+    <None Include="ReadMe.md" />
   </ItemGroup>
 </Project>

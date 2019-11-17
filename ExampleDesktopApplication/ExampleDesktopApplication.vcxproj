@@ -27,4 +27,7 @@
   <ItemGroup>
     <Image Include="ExampleDesktopApplication.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
 </Project>

@@ -31,4 +31,7 @@
       <Project>{622397f5-66c0-4866-a67f-ae827dfa4c03}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
 </Project>
