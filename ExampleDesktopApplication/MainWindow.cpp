@@ -1,25 +1,33 @@
 #include "PCH.hpp"
 #include "Resource.h"
-#include "ExampleDesktopApplication.hpp"
+#include "MainWindow.hpp"
 
 namespace Example
 {
-    HINSTANCE g_instance = nullptr;
-    std::wstring g_title;
-    std::wstring g_windowClassName;
-    HWND g_textBox = nullptr;
-    UINT g_elapsedTime = 0;
+    MainWindow* g_mainWindow = nullptr;
 
-    COLORREF g_backgroundColor = { 0 };
-
-    inline BYTE FunkyColor(int offset)
+    inline BYTE FunkyColor(int offset, UINT elapsedTime)
     {
-        return static_cast<BYTE>(std::sin(0.01 * g_elapsedTime + offset) * 127 + 128);
+        return static_cast<BYTE>(std::sin(0.01 * elapsedTime + offset) * 127 + 128);
     }
 
-    inline COLORREF FunkyColor()
+    inline COLORREF FunkyColor(UINT elapsedTime)
     {
-        return RGB(FunkyColor(0), FunkyColor(2), FunkyColor(4));
+        return RGB(FunkyColor(0, elapsedTime), FunkyColor(2, elapsedTime), FunkyColor(4, elapsedTime));
+    }
+
+    std::wstring GetText(HWND window)
+    {
+        std::wstring buffer;
+        int length = GetWindowTextLength(window);
+
+        if (length)
+        {
+            buffer.resize(length);
+            GetWindowText(window, &buffer.front(), length + 1);
+        }
+
+        return buffer;
     }
 
     std::wstring LoadStdString(HINSTANCE instance, UINT id)
@@ -36,27 +44,25 @@ namespace Example
         return buffer;
     }
 
-    void LoadStrings(HINSTANCE instance)
+    MainWindow::MainWindow()
     {
-        g_title = LoadStdString(instance, IDS_APP_TITLE);
-        g_windowClassName = LoadStdString(instance, IDC_EXAMPLEAPP);
+        g_mainWindow = this;
     }
 
-    std::wstring GetWindowString(HWND window)
+    MainWindow::~MainWindow()
     {
-        std::wstring buffer;
-        int length = GetWindowTextLength(window);
-
-        if (length)
-        {
-            buffer.resize(length);
-            GetWindowText(window, &buffer.front(), length + 1);
-        }
-
-        return buffer;
+        g_mainWindow = nullptr;
     }
 
-    ATOM MyRegisterClass(HINSTANCE instance)
+    bool MainWindow::LoadStrings(HINSTANCE instance)
+    {
+        m_title = LoadStdString(instance, IDS_APP_TITLE);
+        m_windowClassName = LoadStdString(instance, IDC_EXAMPLEAPP);
+
+        return !(m_title.empty() || m_windowClassName.empty());
+    }
+
+    ATOM MainWindow::Register(HINSTANCE instance)
     {
         WNDCLASSEXW windowClass = { 0 };
 
@@ -68,21 +74,31 @@ namespace Example
         windowClass.hInstance = instance;
         windowClass.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDI_EXAMPLEAPP));
         windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+        windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
         windowClass.lpszMenuName = MAKEINTRESOURCEW(IDC_EXAMPLEAPP);
-        windowClass.lpszClassName = g_windowClassName.c_str();
-        windowClass.hIconSm = LoadIcon(windowClass.hInstance, MAKEINTRESOURCE(IDI_EXAMPLEAPP));
+        windowClass.lpszClassName = m_windowClassName.c_str();
+        windowClass.hIconSm = LoadIcon(instance, MAKEINTRESOURCE(IDI_EXAMPLEAPP));
 
         return RegisterClassEx(&windowClass);
     }
 
-    BOOL InitInstance(HINSTANCE instance, int showCommand)
+    bool MainWindow::InitInstance(HINSTANCE instance, int showCommand)
     {
-        g_instance = instance;
+        m_instance = instance;
+
+        if (!LoadStrings(instance))
+        {
+            return false;
+        }
+
+        if (!Register(instance))
+        {
+            return false;
+        }
 
         HWND window = CreateWindow(
-            g_windowClassName.c_str(),
-            g_title.c_str(),
+            m_windowClassName.c_str(),
+            m_title.c_str(),
             WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT,
             0,
@@ -95,28 +111,26 @@ namespace Example
 
         if (!window)
         {
-            return FALSE;
+            return false;
         }
 
         ShowWindow(window, showCommand);
         UpdateWindow(window);
 
-        return TRUE;
+        return true;
     }
 
-    LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK MainWindow::WindowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        static UINT_PTR s_timer = 0;
-
         switch (message)
         {
             case WM_CREATE:
             {
                 constexpr UINT framesPerSecond = 60;
-                s_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
+                g_mainWindow->m_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
 
-                g_textBox = CreateWindow(
-                    L"EDIT",
+                g_mainWindow->m_textBox = CreateWindow(
+                    WC_EDIT,
                     L"",
                     WS_CHILD | WS_VISIBLE | WS_BORDER,
                     10,
@@ -128,8 +142,8 @@ namespace Example
                     nullptr,
                     nullptr);
 
-                CreateWindow(
-                    L"BUTTON",
+                g_mainWindow->m_button = CreateWindow(
+                    WC_BUTTON,
                     L"?",
                     WS_CHILD | WS_VISIBLE | WS_BORDER,
                     420,
@@ -141,6 +155,22 @@ namespace Example
                     nullptr,
                     nullptr);
 
+                g_mainWindow->m_progressBar = CreateWindow(
+                    PROGRESS_CLASS,
+                    L"",
+                    WS_CHILD | WS_VISIBLE | WS_BORDER,
+                    10,
+                    40,
+                    400,
+                    20,
+                    window,
+                    nullptr,
+                    nullptr,
+                    nullptr);
+
+                SendMessage(g_mainWindow->m_progressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+                SendMessage(g_mainWindow->m_progressBar, PBM_SETSTEP, (WPARAM)1, 0);
+
                 break;
             }
             case WM_COMMAND:
@@ -150,13 +180,13 @@ namespace Example
                 switch (menuSelection)
                 {
                     case IDM_ABOUT:
-                        DialogBox(g_instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, About);
+                        DialogBox(g_mainWindow->m_instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, About);
                         break;
                     case IDM_EXIT:
                         DestroyWindow(window);
                         break;
                     case IDC_HELLOBUTTON:
-                        MessageBox(window, GetWindowString(g_textBox).c_str(), L"HELLO", MB_OK);
+                        MessageBox(window, GetText(g_mainWindow->m_textBox).c_str(), L"HELLO", MB_OK);
                         break;
                 }
 
@@ -164,16 +194,19 @@ namespace Example
             }
             case WM_TIMER:
             {
-                ++g_elapsedTime;
-                g_backgroundColor = FunkyColor();
+                ++g_mainWindow->m_elapsedTime;
+                g_mainWindow->m_backgroundColor = FunkyColor(g_mainWindow->m_elapsedTime);
                 InvalidateRect(window, nullptr, false);
+
+                SendMessage(g_mainWindow->m_progressBar, PBM_STEPIT, 0, 0);
+
                 return 0L;
             }
             case WM_PAINT:
             {
                 PAINTSTRUCT paintStruct = { 0 };
                 HDC context = BeginPaint(window, &paintStruct);
-                HBRUSH brush = CreateSolidBrush(g_backgroundColor);
+                HBRUSH brush = CreateSolidBrush(g_mainWindow->m_backgroundColor);
                 FillRect(context, &paintStruct.rcPaint, brush);
                 DeleteObject(brush);
                 EndPaint(window, &paintStruct);
@@ -181,9 +214,9 @@ namespace Example
             }
             case WM_DESTROY:
             {
-                if (s_timer)
+                if (g_mainWindow->m_timer)
                 {
-                    KillTimer(window, s_timer);
+                    KillTimer(window, g_mainWindow->m_timer);
                 }
 
                 PostQuitMessage(0);
@@ -194,7 +227,7 @@ namespace Example
         return DefWindowProc(window, message, wParam, lParam);
     }
 
-    INT_PTR CALLBACK About(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam)
+    INT_PTR CALLBACK MainWindow::About(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam)
     {
         UNREFERENCED_PARAMETER(lParam);
 
@@ -217,37 +250,4 @@ namespace Example
 
         return static_cast<INT_PTR>(FALSE);
     }
-}
-
-int APIENTRY wWinMain(
-    _In_ HINSTANCE instance,
-    _In_opt_ HINSTANCE previousInstance,
-    _In_ LPWSTR commandLine,
-    _In_ int showCommand)
-{
-    UNREFERENCED_PARAMETER(previousInstance);
-    UNREFERENCED_PARAMETER(commandLine);
-
-    Example::LoadStrings(instance);
-    Example::MyRegisterClass(instance);
-
-    if (!Example::InitInstance(instance, showCommand))
-    {
-        return FALSE;
-    }
-
-    HACCEL acceleratorTable = LoadAccelerators(instance, MAKEINTRESOURCE(IDC_EXAMPLEAPP));
-
-    MSG message = { 0 };
-
-    while (GetMessage(&message, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(message.hwnd, acceleratorTable, &message))
-        {
-            TranslateMessage(&message);
-            DispatchMessage(&message);
-        }
-    }
-
-    return static_cast<int>(message.wParam);
 }
