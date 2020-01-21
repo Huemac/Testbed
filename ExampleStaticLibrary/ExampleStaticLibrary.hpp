@@ -2,5 +2,5 @@
 
 namespace ExampleStaticLibrary
 {
-    void Hello();
+	void Hello();
 }

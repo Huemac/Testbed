@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-    void __stdcall ExampleSharedLibraryHello();
+	void __stdcall ExampleSharedLibraryHello();
 
 #if defined(__cplusplus)
 };

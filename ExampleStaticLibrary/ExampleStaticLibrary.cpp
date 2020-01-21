@@ -3,5 +3,5 @@
 
 void ExampleStaticLibrary::Hello()
 {
-    puts(__FUNCTION__);
+	puts(__FUNCTION__);
 }

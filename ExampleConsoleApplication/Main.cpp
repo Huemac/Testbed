@@ -6,18 +6,18 @@
 
 int wmain(/*int argc, wchar_t* argv[], wchar_t* envp[]*/)
 {
-    using namespace Timing;
+	using namespace Timing;
 
-    {
-        Timer timer;
+	{
+		Timer timer;
 
-        ExampleSharedLibraryHello();
-    }
-    {
-        Timer timer;
+		ExampleSharedLibraryHello();
+	}
+	{
+		Timer timer;
 
-        ExampleStaticLibrary::Hello();
-    }
+		ExampleStaticLibrary::Hello();
+	}
 
-    return 0;
+	return 0;
 }
