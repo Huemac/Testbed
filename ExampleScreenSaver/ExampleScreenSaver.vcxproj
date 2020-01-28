@@ -3,6 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B502CE3E-371D-4A0A-ACDB-3380AFED9C5C}</ProjectGuid>
     <ConfigurationType>Application</ConfigurationType>
+    <TargetExt>.scr</TargetExt>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\Testbed.props" />
   <ItemDefinitionGroup>
