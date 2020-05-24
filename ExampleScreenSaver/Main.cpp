@@ -6,7 +6,12 @@
 
 namespace
 {
+#ifndef _WIN64
+	ULONG_PTR g_gdiPlusToken = 0;
+#else	
 	UINT_PTR g_gdiPlusToken = 0;
+#endif
+	
 	UINT g_elapsedTime = 0;
 	UINT_PTR g_timer = 0;
 
