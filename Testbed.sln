@@ -28,11 +28,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleConsoleApplication",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleConsoleApplicationWithLibs", "ExampleConsoleApplicationWithLibs\ExampleConsoleApplicationWithLibs.vcxproj", "{1A64A26A-702A-4BF9-B1A3-497C1EC4828F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MinimalWin32Example", "MinimalWin32Example\MinimalWin32Example.vcxproj", "{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		ExampleSharedCode\ExampleSharedCode.vcxitems*{017720a4-4593-48bd-ac76-2017c60c2c02}*SharedItemsImports = 9
-		ExampleSharedCode\ExampleSharedCode.vcxitems*{3c3d7d94-f627-4538-96f1-0831befd28a9}*SharedItemsImports = 4
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
@@ -96,6 +94,14 @@ Global
 		{1A64A26A-702A-4BF9-B1A3-497C1EC4828F}.Release|x64.Build.0 = Release|x64
 		{1A64A26A-702A-4BF9-B1A3-497C1EC4828F}.Release|x86.ActiveCfg = Release|Win32
 		{1A64A26A-702A-4BF9-B1A3-497C1EC4828F}.Release|x86.Build.0 = Release|Win32
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Debug|x64.ActiveCfg = Debug|x64
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Debug|x64.Build.0 = Debug|x64
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Debug|x86.ActiveCfg = Debug|Win32
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Debug|x86.Build.0 = Debug|Win32
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Release|x64.ActiveCfg = Release|x64
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Release|x64.Build.0 = Release|x64
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Release|x86.ActiveCfg = Release|Win32
+		{5A88E835-8FC6-4CEC-8D0C-AE36DF172E6C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
