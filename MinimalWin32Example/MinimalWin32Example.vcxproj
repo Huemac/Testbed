@@ -17,10 +17,10 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <EntryPointSymbol>main</EntryPointSymbol>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <EntryPointSymbol Condition="'$(Configuration)'=='Release'">main</EntryPointSymbol>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">kernel32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
