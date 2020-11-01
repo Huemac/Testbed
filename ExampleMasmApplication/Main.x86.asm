@@ -1,3 +1,4 @@
+IFDEF X86
 .386
 .MODEL TINY, SYSCALL
 .STACK 1024
@@ -6,23 +7,25 @@ EXTERN _GetStdHandle@4: PROC
 EXTERN _WriteConsoleA@20: PROC
 EXTERN _ExitProcess@4: PROC
 
-_DATA SEGMENT
-	StdOutputHandle = -11
-	HelloMessage db "Hello world!", 0
-	HelloMessageLen = $-HelloMessage
-_DATA ENDS
+.CONST
+StdOutputHandle = -11 ; STD_OUTPUT_HANDLE
+HelloMessage BYTE "Hello world!", 0
+HelloMessageLen = $-HelloMessage
 
-_TEXT SEGMENT
+.DATA
+bytesWritten DWORD 0
+
+.CODE
 HelloWorldMain PROC
 
 	; HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	push StdOutputHandle
 	call _GetStdHandle@4
 
-	; WriteConsoleA(stdout, HelloMessage, HelloMessageLen, 0, 0);
+	; WriteConsoleA(stdout, HelloMessage, HelloMessageLen, bytesWritten, 0);
 	push 0
-	push 0
-	push HelloMessageLen
+	push offset bytesWritten
+	push HelloMessageLen - 1 ; Exclude null terminator
 	push offset HelloMessage
 	push eax
 	call _WriteConsoleA@20
@@ -32,5 +35,6 @@ HelloWorldMain PROC
 	call _ExitProcess@4
 
 HelloWorldMain ENDP
-_TEXT ENDS
+
+ENDIF
 END

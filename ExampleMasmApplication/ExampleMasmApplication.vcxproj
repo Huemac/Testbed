@@ -25,10 +25,13 @@
     </Link>
     <MASM>
       <UseSafeExceptionHandlers>false</UseSafeExceptionHandlers>
+      <PreprocessorDefinitions Condition="'$(Platform)'=='Win32'">X86</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Platform)'=='x64'">X64</PreprocessorDefinitions>
     </MASM>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <MASM Include="Main.asm" />
+    <MASM Include="Main.x64.asm" />
+    <MASM Include="Main.x86.asm" />
   </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
