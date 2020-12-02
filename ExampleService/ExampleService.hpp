@@ -26,8 +26,8 @@ private:
 	static void WINAPI ServiceControlHandler(DWORD);
 	static DWORD WINAPI ServiceWorkerThread(void*);
 
-	const std::wstring m_serviceName = L"ExampleService";
-	SERVICE_STATUS m_serviceStatus = { 0 };
+	wchar_t m_serviceName[15] = L"ExampleService";
+	SERVICE_STATUS m_serviceStatus = { };
 	ExampleSharedCode::ServiceStatusHandle m_statusHandle;
 	ExampleSharedCode::EventHandle m_serviceStopEvent;
 	ExampleSharedCode::ThreadHandle m_thread;

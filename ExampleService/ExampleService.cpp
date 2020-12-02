@@ -25,8 +25,14 @@ DWORD ExampleService::Start()
 
 	const SERVICE_TABLE_ENTRY serviceTable[] =
 	{
-		{ const_cast<wchar_t*>(m_serviceName.c_str()), reinterpret_cast<LPSERVICE_MAIN_FUNCTION>(ServiceMain) },
-		{ nullptr, nullptr }
+		{
+			m_serviceName,
+			reinterpret_cast<LPSERVICE_MAIN_FUNCTION>(ServiceMain)
+		},
+		{
+			nullptr,
+			nullptr
+		}
 	};
 
 	if (!StartServiceCtrlDispatcher(serviceTable))
@@ -76,8 +82,8 @@ void WINAPI ExampleService::ServiceMain(DWORD, LPWSTR*)
 	LOGD << L"Enter";
 	assert(g_instance);
 
-	SERVICE_STATUS_HANDLE h = RegisterServiceCtrlHandler(g_instance->m_serviceName.c_str(), ServiceControlHandler);
-	g_instance->m_statusHandle = h; //RegisterServiceCtrlHandler(g_instance->m_serviceName.c_str(), ServiceControlHandler);
+	g_instance->m_statusHandle =
+		RegisterServiceCtrlHandler(g_instance->m_serviceName, ServiceControlHandler);
 
 	if (!g_instance->m_statusHandle.IsValid())
 	{

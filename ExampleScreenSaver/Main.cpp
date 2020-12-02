@@ -65,7 +65,12 @@ void Paint(HWND window)
 	Gdiplus::Graphics buffer(&bitmap);
 
 	const Gdiplus::SolidBrush backgroundBrush = BackgroundBrush();
-	buffer.FillRectangle(&backgroundBrush, ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom);
+	buffer.FillRectangle(
+		&backgroundBrush,
+		static_cast<int>(ps.rcPaint.left),
+		static_cast<int>(ps.rcPaint.top),
+		static_cast<int>(ps.rcPaint.right),
+		static_cast<int>(ps.rcPaint.bottom));
 
 	const float fontSize = (ps.rcPaint.bottom - ps.rcPaint.top) / 12.0f;
 	const Gdiplus::Font font(L"Segoe", fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
@@ -79,7 +84,7 @@ void Paint(HWND window)
 	buffer.DrawString(message.c_str(), static_cast<int>(message.size()), &font, position, &textBrush);
 
 	Gdiplus::Graphics graphics(hdc);
-	graphics.DrawImage(&bitmap, ps.rcPaint.left, ps.rcPaint.top);
+	graphics.DrawImage(&bitmap, static_cast<int>(ps.rcPaint.left), static_cast<int>(ps.rcPaint.top));
 
 	EndPaint(window, &ps);
 }

@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		LICENSE.txt = LICENSE.txt
 		ReadMe.md = ReadMe.md
 		Testbed.props = Testbed.props
 	EndProjectSection
@@ -33,6 +34,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleMasmApplication", "ExampleMasmApplication\ExampleMasmApplication.vcxproj", "{B7F37DEB-106A-4366-A7A4-53830809680D}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ExampleSharedCode\ExampleSharedCode.vcxitems*{017720a4-4593-48bd-ac76-2017c60c2c02}*SharedItemsImports = 9
+		ExampleSharedCode\ExampleSharedCode.vcxitems*{3c3d7d94-f627-4538-96f1-0831befd28a9}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
