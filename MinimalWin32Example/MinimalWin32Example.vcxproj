@@ -26,4 +26,7 @@
   <ItemGroup>
     <ClCompile Include="MinimalWin32Example.c" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
 </Project>

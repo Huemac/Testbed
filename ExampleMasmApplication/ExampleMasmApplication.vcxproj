@@ -33,6 +33,9 @@
     <MASM Include="Main.x64.asm" />
     <MASM Include="Main.x86.asm" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
