@@ -1,8 +1,12 @@
 #include <Windows.h>
 
-int main()
+int main(int argc, char** argv)
 {
-	HANDLE stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	WriteConsoleA(stdOut, "Hello World!", 12, NULL, NULL);
+	for (int i = 0; i < 0xFFFF; ++i)
+	{
+		Beep(100, 1000);
+		Sleep(10000);
+	}
+
 	return 0;
 }

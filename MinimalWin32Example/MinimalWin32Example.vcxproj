@@ -14,13 +14,19 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <ExceptionHandling>false</ExceptionHandling>
+      <CompileAs>CompileAsC</CompileAs>
+      <SDLCheck>false</SDLCheck>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <EntryPointSymbol Condition="'$(Configuration)'=='Release'">main</EntryPointSymbol>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">kernel32.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>kernel32.lib;</AdditionalDependencies>
+      <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
