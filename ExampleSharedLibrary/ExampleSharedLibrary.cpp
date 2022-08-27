@@ -14,7 +14,7 @@ namespace
 	{
 		static std::random_device randomDevice;
 		static std::default_random_engine randomEngine(randomDevice());
-		static const std::uniform_int_distribution<WORD> distribution(0, 256);
+		static std::uniform_int_distribution<WORD> distribution(0, 256);
 		return distribution(randomEngine);
 	}
 }
