@@ -19,4 +19,4 @@ jobs:
 
     - name: Static analysis
       run: |
-        cppcheck --project=Testbed.cppcheck
+        cppcheck --project=Testbed.cppcheck --error-exitcode=1 --enable=warning,style
