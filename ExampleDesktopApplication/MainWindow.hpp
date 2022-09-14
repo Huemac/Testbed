@@ -17,9 +17,10 @@ namespace Example
 	private:
 		static INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
-		HWND _textBox = nullptr;
-		HWND _button = nullptr;
-		HWND _progressBar = nullptr;
+		Widget _textBox;
+		Widget _button;
+		Widget _progressBar;
+
 		UINT_PTR _timer = 0;
 		UINT _elapsedTime = 0;
 		COLORREF _backgroundColor = { 0 };

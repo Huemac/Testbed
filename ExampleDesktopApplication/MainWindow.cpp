@@ -14,21 +14,6 @@ namespace Example
 		return RGB(FunkyColor(0, elapsedTime), FunkyColor(2, elapsedTime), FunkyColor(4, elapsedTime));
 	}
 
-	std::wstring GetText(HWND window)
-	{
-		std::wstring buffer;
-		int length = GetWindowTextLength(window);
-
-		if (length <= 0)
-		{
-			return L"You typed nothing!";
-		}
-
-		buffer.resize(length);
-		GetWindowText(window, &buffer.front(), length + 1);
-		return buffer;
-	}
-
 	MainWindow::MainWindow(HINSTANCE instance) :
 		Window<MainWindow>(instance)
 	{
@@ -81,20 +66,16 @@ namespace Example
 				constexpr static UINT framesPerSecond = 60;
 				_timer = SetTimer(Frame(), 1, 1000 / framesPerSecond, nullptr);
 
-				_textBox = CreateWindow(
+				_textBox = AddWidget(
 					WC_EDIT,
 					L"",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
 					10,
 					10,
 					400,
-					20,
-					Frame(),
-					nullptr,
-					nullptr,
-					nullptr);
+					20);
 
-				_button = CreateWindow(
+				_button = AddWidget(
 					WC_BUTTON,
 					L"?",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
@@ -102,26 +83,19 @@ namespace Example
 					10,
 					70,
 					20,
-					Frame(),
-					reinterpret_cast<HMENU>(IDC_HELLOBUTTON),
-					nullptr,
-					nullptr);
+					reinterpret_cast<HMENU>(IDC_HELLOBUTTON));
 
-				_progressBar = CreateWindow(
+				_progressBar = AddWidget(
 					PROGRESS_CLASS,
 					L"",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
 					10,
 					40,
 					400,
-					20,
-					Frame(),
-					nullptr,
-					nullptr,
-					nullptr);
+					20);
 
-				SendMessage(_progressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
-				SendMessage(_progressBar, PBM_SETSTEP, (WPARAM)1, 0);
+				_progressBar.Send(PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+				_progressBar.Send(PBM_SETSTEP, (WPARAM)1, 0);
 
 				return true;
 			}
@@ -140,7 +114,7 @@ namespace Example
 				_backgroundColor = FunkyColor(++_elapsedTime);
 				InvalidateRect(Frame(), nullptr, false);
 
-				SendMessage(_progressBar, PBM_STEPIT, 0, 0);
+				_progressBar.Send(PBM_STEPIT, 0, 0);
 
 				return true;
 			}
@@ -157,7 +131,15 @@ namespace Example
 						DestroyWindow(Frame());
 						break;
 					case IDC_HELLOBUTTON:
-						MessageBox(Frame(), GetText(_textBox).c_str(), L"HELLO", MB_OK);
+
+						std::wstring text = _textBox.Text();
+
+						if (text.empty())
+						{
+							text = L"You typed nothing!";
+						}
+
+						MessageBox(Frame(), text.c_str(), L"HELLO", MB_OK);
 						break;
 				}
 

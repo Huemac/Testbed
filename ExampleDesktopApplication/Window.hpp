@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#include <cassert>
+#include "Widget.hpp"
 
 namespace Example
 {
@@ -43,6 +42,19 @@ namespace Example
 
 		virtual ~Window()
 		{
+		}
+
+		Widget AddWidget(
+			const wchar_t* className,
+			const wchar_t* windowName,
+			DWORD style,
+			int x,
+			int y,
+			int w,
+			int h,
+			HMENU menu = nullptr)
+		{
+			return Widget(className, windowName, style, x, y, w, h, _frame, menu, _instance, nullptr);
 		}
 
 		bool Show(int showCommand)
