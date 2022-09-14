@@ -54,17 +54,9 @@ namespace Example
 		g_mainWindow = nullptr;
 	}
 
-	bool MainWindow::LoadStrings(HINSTANCE instance)
-	{
-		m_title = LoadStdString(instance, IDS_APP_TITLE);
-		m_windowClassName = LoadStdString(instance, IDC_EXAMPLEAPP);
-
-		return !(m_title.empty() || m_windowClassName.empty());
-	}
-
 	ATOM MainWindow::Register(HINSTANCE instance)
 	{
-		WNDCLASSEXW windowClass = { 0 };
+		WNDCLASSEXW windowClass = { };
 
 		windowClass.cbSize = sizeof(WNDCLASSEX);
 		windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -76,7 +68,7 @@ namespace Example
 		windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 		windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 		windowClass.lpszMenuName = MAKEINTRESOURCEW(IDC_EXAMPLEAPP);
-		windowClass.lpszClassName = m_windowClassName.c_str();
+		windowClass.lpszClassName = _windowClassName.data();
 		windowClass.hIconSm = LoadIcon(instance, MAKEINTRESOURCE(IDI_EXAMPLEAPP));
 
 		return RegisterClassEx(&windowClass);
@@ -84,12 +76,7 @@ namespace Example
 
 	bool MainWindow::InitInstance(HINSTANCE instance, int showCommand)
 	{
-		m_instance = instance;
-
-		if (!LoadStrings(instance))
-		{
-			return false;
-		}
+		_instance = instance;
 
 		if (!Register(instance))
 		{
@@ -97,8 +84,8 @@ namespace Example
 		}
 
 		HWND window = CreateWindow(
-			m_windowClassName.c_str(),
-			m_title.c_str(),
+			_windowClassName.data(),
+			_title.data(),
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT,
 			0,
@@ -115,7 +102,6 @@ namespace Example
 		}
 
 		ShowWindow(window, showCommand);
-		UpdateWindow(window);
 
 		return true;
 	}
@@ -127,9 +113,9 @@ namespace Example
 			case WM_CREATE:
 			{
 				constexpr UINT framesPerSecond = 60;
-				g_mainWindow->m_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
+				g_mainWindow->_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
 
-				g_mainWindow->m_textBox = CreateWindow(
+				g_mainWindow->_textBox = CreateWindow(
 					WC_EDIT,
 					L"",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
@@ -142,7 +128,7 @@ namespace Example
 					nullptr,
 					nullptr);
 
-				g_mainWindow->m_button = CreateWindow(
+				g_mainWindow->_button = CreateWindow(
 					WC_BUTTON,
 					L"?",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
@@ -155,7 +141,7 @@ namespace Example
 					nullptr,
 					nullptr);
 
-				g_mainWindow->m_progressBar = CreateWindow(
+				g_mainWindow->_progressBar = CreateWindow(
 					PROGRESS_CLASS,
 					L"",
 					WS_CHILD | WS_VISIBLE | WS_BORDER,
@@ -168,8 +154,8 @@ namespace Example
 					nullptr,
 					nullptr);
 
-				SendMessage(g_mainWindow->m_progressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
-				SendMessage(g_mainWindow->m_progressBar, PBM_SETSTEP, (WPARAM)1, 0);
+				SendMessage(g_mainWindow->_progressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+				SendMessage(g_mainWindow->_progressBar, PBM_SETSTEP, (WPARAM)1, 0);
 
 				break;
 			}
@@ -180,13 +166,13 @@ namespace Example
 				switch (menuSelection)
 				{
 					case IDM_ABOUT:
-						DialogBox(g_mainWindow->m_instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, About);
+						DialogBox(g_mainWindow->_instance, MAKEINTRESOURCE(IDD_ABOUTBOX), window, About);
 						break;
 					case IDM_EXIT:
 						DestroyWindow(window);
 						break;
 					case IDC_HELLOBUTTON:
-						MessageBox(window, GetText(g_mainWindow->m_textBox).c_str(), L"HELLO", MB_OK);
+						MessageBox(window, GetText(g_mainWindow->_textBox).c_str(), L"HELLO", MB_OK);
 						break;
 				}
 
@@ -194,11 +180,11 @@ namespace Example
 			}
 			case WM_TIMER:
 			{
-				++g_mainWindow->m_elapsedTime;
-				g_mainWindow->m_backgroundColor = FunkyColor(g_mainWindow->m_elapsedTime);
+				++g_mainWindow->_elapsedTime;
+				g_mainWindow->_backgroundColor = FunkyColor(g_mainWindow->_elapsedTime);
 				InvalidateRect(window, nullptr, false);
 
-				SendMessage(g_mainWindow->m_progressBar, PBM_STEPIT, 0, 0);
+				SendMessage(g_mainWindow->_progressBar, PBM_STEPIT, 0, 0);
 
 				return 0L;
 			}
@@ -206,7 +192,7 @@ namespace Example
 			{
 				PAINTSTRUCT paintStruct = { 0 };
 				HDC context = BeginPaint(window, &paintStruct);
-				HBRUSH brush = CreateSolidBrush(g_mainWindow->m_backgroundColor);
+				HBRUSH brush = CreateSolidBrush(g_mainWindow->_backgroundColor);
 				FillRect(context, &paintStruct.rcPaint, brush);
 				DeleteObject(brush);
 				EndPaint(window, &paintStruct);
@@ -214,9 +200,9 @@ namespace Example
 			}
 			case WM_DESTROY:
 			{
-				if (g_mainWindow->m_timer)
+				if (g_mainWindow->_timer)
 				{
-					KillTimer(window, g_mainWindow->m_timer);
+					KillTimer(window, g_mainWindow->_timer);
 				}
 
 				PostQuitMessage(0);

@@ -4,6 +4,8 @@
 
 namespace Example
 {
+#define ClassName(x) L#x
+
 	class MainWindow
 	{
 	public:
@@ -13,20 +15,19 @@ namespace Example
 		bool InitInstance(HINSTANCE, int);
 
 	private:
-		bool LoadStrings(HINSTANCE);
 		ATOM Register(HINSTANCE);
 
 		static LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 		static INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
-		std::wstring m_title;
-		std::wstring m_windowClassName;
-		HWND m_textBox = nullptr;
-		HWND m_button = nullptr;
-		HWND m_progressBar = nullptr;
-		UINT_PTR m_timer = 0;
-		UINT m_elapsedTime = 0;
-		COLORREF m_backgroundColor = { 0 };
-		HINSTANCE m_instance = nullptr;
+		std::wstring_view _title = L"Main Window";
+		std::wstring_view _windowClassName = ClassName(MainWindow);
+		HWND _textBox = nullptr;
+		HWND _button = nullptr;
+		HWND _progressBar = nullptr;
+		UINT_PTR _timer = 0;
+		UINT _elapsedTime = 0;
+		COLORREF _backgroundColor = { 0 };
+		HINSTANCE _instance = nullptr;
 	};
 }

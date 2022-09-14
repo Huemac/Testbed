@@ -18,17 +18,12 @@ int APIENTRY wWinMain(
 		return GetLastError();
 	}
 
-	HACCEL acceleratorTable = LoadAccelerators(instance, MAKEINTRESOURCE(IDC_EXAMPLEAPP));
-
 	MSG message = { 0 };
 
 	while (GetMessage(&message, nullptr, 0, 0))
 	{
-		if (!TranslateAccelerator(message.hwnd, acceleratorTable, &message))
-		{
-			TranslateMessage(&message);
-			DispatchMessage(&message);
-		}
+		TranslateMessage(&message);
+		DispatchMessage(&message);
 	}
 
 	return static_cast<int>(message.wParam);
