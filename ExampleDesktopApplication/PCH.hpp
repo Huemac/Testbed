@@ -7,3 +7,9 @@
 
 #include <string>
 #include <cmath>
+
+template <typename T>
+void Clear(T* x)
+{
+	memset(x, 0, sizeof(T));
+}

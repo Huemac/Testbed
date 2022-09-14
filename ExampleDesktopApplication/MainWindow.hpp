@@ -1,33 +1,27 @@
 #pragma once
 
-#include <Windows.h>
+#include "Window.hpp"
 
 namespace Example
 {
-#define ClassName(x) L#x
-
-	class MainWindow
+	class MainWindow : public Window<MainWindow>
 	{
 	public:
-		MainWindow();
+		MainWindow(HINSTANCE instance);
 		~MainWindow();
 
-		bool InitInstance(HINSTANCE, int);
+		WNDCLASSEXW RegisterInfo() const override;
+		CREATESTRUCTW CreateInfo() const override;
+		bool HandleMessage(UINT, WPARAM, LPARAM) override;
 
 	private:
-		ATOM Register(HINSTANCE);
-
-		static LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 		static INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
-		std::wstring_view _title = L"Main Window";
-		std::wstring_view _windowClassName = ClassName(MainWindow);
 		HWND _textBox = nullptr;
 		HWND _button = nullptr;
 		HWND _progressBar = nullptr;
 		UINT_PTR _timer = 0;
 		UINT _elapsedTime = 0;
 		COLORREF _backgroundColor = { 0 };
-		HINSTANCE _instance = nullptr;
 	};
 }

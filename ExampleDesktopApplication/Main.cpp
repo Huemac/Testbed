@@ -11,14 +11,15 @@ int APIENTRY wWinMain(
 	UNREFERENCED_PARAMETER(previousInstance);
 	UNREFERENCED_PARAMETER(commandLine);
 
-	Example::MainWindow mainWindow;
+	Example::MainWindow mainWindow(instance);
 
-	if (!mainWindow.InitInstance(instance, showCommand))
+	if (!mainWindow.Show(showCommand))
 	{
 		return GetLastError();
 	}
 
-	MSG message = { 0 };
+	MSG message = {};
+	Clear(&message);
 
 	while (GetMessage(&message, nullptr, 0, 0))
 	{

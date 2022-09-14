@@ -14,6 +14,7 @@
     <ClInclude Include="PCH.hpp" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="MainWindow.hpp" />
+    <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWindow.cpp" />
