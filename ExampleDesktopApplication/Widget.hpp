@@ -11,6 +11,7 @@ namespace Example
 		Widget() = default;
 
 		Widget(
+			DWORD extraStyle,
 			const wchar_t* className,
 			const wchar_t* windowName,
 			DWORD style,

@@ -52,9 +52,10 @@ namespace Example
 			int y,
 			int w,
 			int h,
-			HMENU menu = nullptr)
+			HMENU menu = nullptr,
+			DWORD extraStyle = 0)
 		{
-			return Widget(className, windowName, style, x, y, w, h, _frame, menu, _instance, nullptr);
+			return Widget(extraStyle, className, windowName, style, x, y, w, h, _frame, menu, _instance, nullptr);
 		}
 
 		bool Show(int showCommand)

@@ -4,6 +4,7 @@
 namespace Example
 {
 	Widget::Widget(
+		DWORD extraStyle,
 		const wchar_t* className,
 		const wchar_t* windowName,
 		DWORD style,
@@ -15,7 +16,8 @@ namespace Example
 		HMENU menu,
 		HINSTANCE instance,
 		void* data) :
-		_self(CreateWindowW(
+		_self(CreateWindowExW(
+			extraStyle,
 			className,
 			windowName,
 			style,
