@@ -10,8 +10,6 @@ namespace Example
 		MainWindow(HINSTANCE instance);
 		~MainWindow();
 
-		WNDCLASSEXW RegisterInfo() const override;
-		CREATESTRUCTW CreateInfo() const override;
 		bool HandleMessage(UINT, WPARAM, LPARAM) override;
 
 	private:

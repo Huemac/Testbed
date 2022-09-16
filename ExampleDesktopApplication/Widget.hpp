@@ -1,8 +1,5 @@
 #pragma once
 
-#include <Windows.h>
-#include <cassert>
-
 namespace Example
 {
 	class Widget
@@ -30,6 +27,6 @@ namespace Example
 		LRESULT Send(UINT message, WPARAM wParam, LPARAM lParam) const;
 
 	private:
-		HWND _self = nullptr;
+		HWND _window = nullptr;
 	};
 };

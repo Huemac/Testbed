@@ -10,16 +10,16 @@ namespace Example
 	class Window
 	{
 	public:
-		static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+		static LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			Derived* derived = nullptr;
 
-			if (message == WM_NCCREATE)
+			if (message == WM_CREATE)
 			{
 				auto created = reinterpret_cast<CREATESTRUCT*>(lParam);
-				derived = reinterpret_cast<Derived*>(created->lpCreateParams);
+				derived = static_cast<Derived*>(created->lpCreateParams);
+				derived->_window = window;
 				SetWindowLongPtr(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(derived));
-				derived->_frame = window;
 			}
 			else
 			{
@@ -35,13 +35,86 @@ namespace Example
 			return DefWindowProc(window, message, wParam, lParam);
 		}
 
-		Window(HINSTANCE instance = GetModuleHandle(nullptr)) :
-			_instance(instance)
+		Window(
+			HINSTANCE instance,
+			const wchar_t* className,
+			const wchar_t* title,
+			int width,
+			int height,
+			HICON icon = nullptr,
+			HCURSOR cursor = nullptr,
+			HBRUSH brush = nullptr,
+			const wchar_t* menuName = nullptr)
 		{
+			WNDCLASSEXW windowClass;
+			Clear(&windowClass);
+			windowClass.cbSize = sizeof(WNDCLASSEXW);
+			windowClass.style = CS_HREDRAW | CS_VREDRAW;
+			windowClass.lpfnWndProc = &Derived::WindowProcedure;
+			windowClass.cbClsExtra = 0;
+			windowClass.cbWndExtra = 0;
+			windowClass.hInstance = instance;
+			windowClass.hIcon = icon;
+			windowClass.hCursor = cursor;
+			windowClass.hbrBackground = brush;
+			windowClass.lpszMenuName = menuName;
+			windowClass.lpszClassName = className;
+
+			ATOM atom = RegisterClassExW(&windowClass);
+
+			assert(atom != 0);
+
+			_windowStyle.lpCreateParams = this;
+			_windowStyle.hInstance = instance;
+			_windowStyle.hMenu = nullptr;
+			_windowStyle.hwndParent = nullptr;
+			_windowStyle.cy = height;
+			_windowStyle.cx = width;
+			_windowStyle.y = CW_USEDEFAULT;
+			_windowStyle.x = CW_USEDEFAULT;
+			_windowStyle.style = WS_OVERLAPPEDWINDOW;
+			_windowStyle.lpszName = title;
+			_windowStyle.lpszClass = MAKEINTATOM(atom);
+			_windowStyle.dwExStyle = 0;
 		}
 
 		virtual ~Window()
 		{
+		}
+
+		bool Show(int showCommand)
+		{
+			if (!_window)
+			{
+				HWND window = CreateWindowEx(
+					_windowStyle.dwExStyle,
+					_windowStyle.lpszClass,
+					_windowStyle.lpszName,
+					_windowStyle.style,
+					_windowStyle.x,
+					_windowStyle.y,
+					_windowStyle.cx,
+					_windowStyle.cy,
+					_windowStyle.hwndParent,
+					_windowStyle.hMenu,
+					_windowStyle.hInstance,
+					_windowStyle.lpCreateParams);
+
+				// WindowProcedure triggers immediately after CreateWindowEx
+				assert(window != nullptr);
+				assert(window == _window);
+			}
+
+			ShowWindow(_window, showCommand);
+			return true;
+		}
+
+	protected:
+		virtual bool HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+
+		HINSTANCE Instance() const
+		{
+			return _windowStyle.hInstance;
 		}
 
 		Widget AddWidget(
@@ -55,87 +128,12 @@ namespace Example
 			HMENU menu = nullptr,
 			DWORD extraStyle = 0)
 		{
-			return Widget(extraStyle, className, windowName, style, x, y, w, h, _frame, menu, _instance, nullptr);
+			return Widget(extraStyle, className, windowName, style, x, y, w, h, _window, menu, Instance(), nullptr);
 		}
 
-		bool Show(int showCommand)
-		{
-			// HERE BE DRAGONS
-
-			if (!_class)
-			{
-				_class = Register();
-			}
-
-			if (_class && !_frame)
-			{
-				HWND frame = Create();
-				assert(frame == _frame);
-			}
-
-			if (!_frame)
-			{
-				return false;
-			}
-
-			ShowWindow(_frame, showCommand);
-			return true;
-		}
-
-	protected:
-		virtual WNDCLASSEXW RegisterInfo() const = 0;
-		virtual CREATESTRUCTW CreateInfo() const = 0;
-		virtual bool HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
-
-		HINSTANCE Instance() const
-		{
-			return _instance;
-		}
-
-		HWND Frame() const
-		{
-			return _frame;
-		}
+		HWND _window = nullptr;
 
 	private:
-		ATOM Register()
-		{
-			WNDCLASSEXW wc = RegisterInfo();
-			
-			if (!wc.lpfnWndProc)
-			{
-				wc.lpfnWndProc = Derived::WindowProc;
-			}
-
-			if (!wc.hInstance)
-			{
-				wc.hInstance = _instance;
-			}
-
-			return RegisterClassExW(&wc);
-		}
-
-		HWND Create()
-		{
-			CREATESTRUCTW c = CreateInfo();
-
-			return CreateWindowEx(
-				c.dwExStyle,
-				c.lpszClass ? c.lpszClass : MAKEINTATOM(_class),
-				c.lpszName,
-				c.style,
-				c.x,
-				c.y,
-				c.cx,
-				c.cy,
-				c.hwndParent,
-				c.hMenu,
-				c.hInstance ? c.hInstance : _instance,
-				c.lpCreateParams ? c.lpCreateParams : this);
-		}
-
-		HINSTANCE _instance = nullptr;
-		ATOM _class = 0;
-		HWND _frame = nullptr;
+		CREATESTRUCT _windowStyle;
 	};
 }

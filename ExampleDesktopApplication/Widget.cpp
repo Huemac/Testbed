@@ -16,7 +16,7 @@ namespace Example
 		HMENU menu,
 		HINSTANCE instance,
 		void* data) :
-		_self(CreateWindowExW(
+		_window(CreateWindowExW(
 			extraStyle,
 			className,
 			windowName,
@@ -35,12 +35,12 @@ namespace Example
 	std::wstring Widget::Text() const
 	{
 		std::wstring buffer;
-		int length = GetWindowTextLength(_self);
+		int length = GetWindowTextLength(_window);
 
 		if (length > 0)
 		{
 			buffer.resize(length);
-			GetWindowText(_self, &buffer.front(), length + 1);
+			GetWindowText(_window, &buffer.front(), length + 1);
 		}
 
 		return buffer;
@@ -48,6 +48,6 @@ namespace Example
 
 	LRESULT Widget::Send(UINT message, WPARAM wParam, LPARAM lParam) const
 	{
-		return SendMessage(_self, message, wParam, lParam);
+		return SendMessage(_window, message, wParam, lParam);
 	}
 }

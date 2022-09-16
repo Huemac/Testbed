@@ -5,8 +5,9 @@
 #include <Windows.h>
 #include <CommCtrl.h>
 
-#include <string>
+#include <cassert>
 #include <cmath>
+#include <string>
 
 template <typename T>
 void Clear(T* x)

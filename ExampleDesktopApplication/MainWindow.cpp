@@ -15,46 +15,21 @@ namespace Example
 	}
 
 	MainWindow::MainWindow(HINSTANCE instance) :
-		Window<MainWindow>(instance)
+		Window<MainWindow>(
+			instance, 
+			ClassName(MainWindow),
+			L"Main Window",
+			800,
+			600,
+			LoadIcon(instance, MAKEINTRESOURCE(IDI_EXAMPLEAPP)),
+			LoadCursor(instance, IDC_CROSS),
+			reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1),
+			MAKEINTRESOURCEW(IDC_EXAMPLEAPP))
 	{
 	}
 
 	MainWindow::~MainWindow()
 	{
-	}
-
-	WNDCLASSEXW MainWindow::RegisterInfo() const
-	{
-		WNDCLASSEXW w;
-		Clear(&w);
-
-		w.cbSize = sizeof(WNDCLASSEXW);
-		w.style = CS_HREDRAW | CS_VREDRAW;
-		w.hIcon = LoadIcon(Instance(), MAKEINTRESOURCE(IDI_EXAMPLEAPP));
-		w.hCursor = LoadCursor(Instance(), IDC_CROSS);
-		w.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-		w.lpszMenuName = MAKEINTRESOURCEW(IDC_EXAMPLEAPP);
-		w.lpszClassName = ClassName(MainWindow);
-		w.hIconSm = LoadIcon(Instance(), MAKEINTRESOURCE(IDI_EXAMPLEAPP));
-
-		return w;
-	}
-
-	CREATESTRUCTW MainWindow::CreateInfo() const
-	{
-		CREATESTRUCTW c;
-		Clear(&c);
-
-		c.x = CW_USEDEFAULT;
-		c.y = CW_USEDEFAULT;
-		c.cx = 800;
-		c.cy = 600;
-
-		c.style = WS_OVERLAPPEDWINDOW;
-		c.lpszClass = ClassName(MainWindow);
-		c.lpszName = L"Main Window";
-
-		return c;
 	}
 
 	bool MainWindow::HandleMessage(UINT message, WPARAM wParam, LPARAM)
@@ -64,7 +39,7 @@ namespace Example
 			case WM_CREATE:
 			{
 				constexpr static UINT framesPerSecond = 60;
-				_timer = SetTimer(Frame(), 1, 1000 / framesPerSecond, nullptr);
+				_timer = SetTimer(_window, 1, 1000 / framesPerSecond, nullptr);
 
 				_textBox = AddWidget(
 					WC_EDIT,
@@ -102,17 +77,18 @@ namespace Example
 			case WM_PAINT:
 			{
 				PAINTSTRUCT paintStruct = { 0 };
-				HDC context = BeginPaint(Frame(), &paintStruct);
+				HDC context = BeginPaint(_window, &paintStruct);
 				HBRUSH brush = CreateSolidBrush(_backgroundColor);
 				FillRect(context, &paintStruct.rcPaint, brush);
 				DeleteObject(brush);
-				EndPaint(Frame(), &paintStruct);
+				EndPaint(_window, &paintStruct);
+
 				return true;
 			}
 			case WM_TIMER:
 			{
 				_backgroundColor = FunkyColor(++_elapsedTime);
-				InvalidateRect(Frame(), nullptr, false);
+				InvalidateRect(_window, nullptr, false);
 
 				_progressBar.Send(PBM_STEPIT, 0, 0);
 
@@ -125,10 +101,10 @@ namespace Example
 				switch (menuSelection)
 				{
 					case IDM_ABOUT:
-						DialogBox(Instance(), MAKEINTRESOURCE(IDD_ABOUTBOX), Frame(), About);
+						DialogBox(Instance(), MAKEINTRESOURCE(IDD_ABOUTBOX), _window, About);
 						break;
 					case IDM_EXIT:
-						DestroyWindow(Frame());
+						DestroyWindow(_window);
 						break;
 					case IDC_HELLOBUTTON:
 
@@ -139,7 +115,7 @@ namespace Example
 							text = L"You typed nothing!";
 						}
 
-						MessageBox(Frame(), text.c_str(), L"HELLO", MB_OK);
+						MessageBox(_window, text.c_str(), L"HELLO", MB_OK);
 						break;
 				}
 
@@ -149,7 +125,7 @@ namespace Example
 			{
 				if (_timer)
 				{
-					KillTimer(Frame(), _timer);
+					KillTimer(_window, _timer);
 				}
 
 				PostQuitMessage(0);
