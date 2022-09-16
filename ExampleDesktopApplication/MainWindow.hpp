@@ -4,7 +4,7 @@
 
 namespace Example
 {
-	class MainWindow : public Window<MainWindow>
+	class MainWindow : public Window
 	{
 	public:
 		MainWindow(HINSTANCE instance);

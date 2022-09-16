@@ -15,8 +15,8 @@ namespace Example
 	}
 
 	MainWindow::MainWindow(HINSTANCE instance) :
-		Window<MainWindow>(
-			instance, 
+		Window(
+			instance,
 			ClassName(MainWindow),
 			L"Main Window",
 			800,
@@ -71,6 +71,10 @@ namespace Example
 
 				_progressBar.Send(PBM_SETRANGE, 0, MAKELPARAM(0, 100));
 				_progressBar.Send(PBM_SETSTEP, (WPARAM)1, 0);
+
+				// Just as an example.
+				// Widget class can be subclassed and listen messages of a window or another widget.
+				_button.Intercept(_window);
 
 				return true;
 			}
