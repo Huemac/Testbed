@@ -18,6 +18,7 @@ namespace Example
 		windowClass.hbrBackground = brush;
 		windowClass.lpszMenuName = menuName;
 		windowClass.lpszClassName = className;
+		windowClass.hIconSm = nullptr;
 
 		ATOM atom = RegisterClassExW(&windowClass);
 
