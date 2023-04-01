@@ -4,29 +4,17 @@
 
 namespace
 {
-	ExampleService* g_instance = nullptr;
-}
-
-ExampleService::ExampleService()
-{
-	LOGD << "ExampleService";
-	g_instance = this;
-}
-
-ExampleService::~ExampleService()
-{
-	LOGD << "~ExampleService";
-	g_instance = nullptr;
+	wchar_t _serviceName[15] = L"ExampleService";
 }
 
 DWORD ExampleService::Start()
 {
 	LOGD << L"Enter";
 
-	const SERVICE_TABLE_ENTRY serviceTable[] =
+	const SERVICE_TABLE_ENTRY _serviceTable[2] =
 	{
 		{
-			m_serviceName,
+			_serviceName,
 			reinterpret_cast<LPSERVICE_MAIN_FUNCTION>(ServiceMain)
 		},
 		{
@@ -35,7 +23,7 @@ DWORD ExampleService::Start()
 		}
 	};
 
-	if (!StartServiceCtrlDispatcher(serviceTable))
+	if (!StartServiceCtrlDispatcher(_serviceTable))
 	{
 		DWORD error = GetLastError();
 		LOGD << L"StartServiceCtrlDispatcher failed: " << error;
@@ -46,32 +34,42 @@ DWORD ExampleService::Start()
 	return ERROR_SUCCESS;
 }
 
+ExampleService::ExampleService()
+{
+	LOGD << "ExampleService";
+}
+
+ExampleService::~ExampleService()
+{
+	LOGD << "~ExampleService";
+}
+
 bool ExampleService::IsPendingOperation()
 {
 	// See https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status
-	return m_serviceStatus.dwCurrentState == SERVICE_START_PENDING ||
-		m_serviceStatus.dwCurrentState == SERVICE_STOP_PENDING ||
-		m_serviceStatus.dwCurrentState == SERVICE_CONTINUE_PENDING ||
-		m_serviceStatus.dwCurrentState == SERVICE_PAUSE_PENDING;
+	return _status.dwCurrentState == SERVICE_START_PENDING ||
+		_status.dwCurrentState == SERVICE_STOP_PENDING ||
+		_status.dwCurrentState == SERVICE_CONTINUE_PENDING ||
+		_status.dwCurrentState == SERVICE_PAUSE_PENDING;
 }
 
 bool ExampleService::CanAcceptStop()
 {
-	return m_serviceStatus.dwCurrentState == SERVICE_RUNNING ||
-		m_serviceStatus.dwCurrentState == SERVICE_PAUSED;
+	return _status.dwCurrentState == SERVICE_RUNNING ||
+		_status.dwCurrentState == SERVICE_PAUSED;
 }
 
 void ExampleService::UpdateStatus(DWORD currentState, DWORD exitCode, DWORD waitHint)
 {
 	static DWORD checkPoint = 1;
 
-	m_serviceStatus.dwCurrentState = currentState;
-	m_serviceStatus.dwControlsAccepted = CanAcceptStop() ? SERVICE_ACCEPT_STOP : 0;
-	m_serviceStatus.dwWin32ExitCode = exitCode;
-	m_serviceStatus.dwCheckPoint = IsPendingOperation() ? checkPoint++ : 0;
-	m_serviceStatus.dwWaitHint = waitHint;
+	_status.dwCurrentState = currentState;
+	_status.dwControlsAccepted = CanAcceptStop() ? SERVICE_ACCEPT_STOP : 0;
+	_status.dwWin32ExitCode = exitCode;
+	_status.dwCheckPoint = IsPendingOperation() ? checkPoint++ : 0;
+	_status.dwWaitHint = waitHint;
 
-	if (!m_statusHandle.SetStatus(&m_serviceStatus))
+	if (!_statusHandle.SetStatus(&_status))
 	{
 		LOGD << L"SetServiceStatus failed!";
 	}
@@ -80,58 +78,63 @@ void ExampleService::UpdateStatus(DWORD currentState, DWORD exitCode, DWORD wait
 void WINAPI ExampleService::ServiceMain(DWORD, LPWSTR*)
 {
 	LOGD << L"Enter";
-	assert(g_instance);
 
-	g_instance->m_statusHandle =
-		RegisterServiceCtrlHandler(g_instance->m_serviceName, ServiceControlHandler);
+	ExampleService service;
 
-	if (!g_instance->m_statusHandle.IsValid())
+	service._statusHandle =
+		RegisterServiceCtrlHandlerEx(_serviceName, ServiceHandler, &service);
+
+	if (!service._statusHandle.IsValid())
 	{
 		LOGD << L"RegisterServiceCtrlHandler failed!";
 		return;
 	}
 
 	// Tell the service controller we are starting
-	g_instance->m_serviceStatus = { 0 };
-	g_instance->m_serviceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-	g_instance->UpdateStatus(SERVICE_START_PENDING, NO_ERROR, 0);
+	service._status = { 0 };
+	service._status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+	service.UpdateStatus(SERVICE_START_PENDING, NO_ERROR, 0);
 
 	// Perform tasks neccesary to start the service here
 	LOGD << L"Starting service";
-	g_instance->m_serviceStopEvent = CreateEvent(nullptr, true, false, nullptr);
+	service._stopEvent = CreateEvent(nullptr, true, false, nullptr);
 
-	if (!g_instance->m_serviceStopEvent.IsValid())
+	if (!service._stopEvent.IsValid())
 	{
 		LOGD << "CreateEvent failed!";
-		g_instance->UpdateStatus(SERVICE_STOPPED, GetLastError());
+		service.UpdateStatus(SERVICE_STOPPED, GetLastError());
 		return;
 	}
 
 	// Tell the service controller we are started
-	g_instance->UpdateStatus(SERVICE_RUNNING);
+	service.UpdateStatus(SERVICE_RUNNING);
 
 	// Start the thread that will perform the main task of the service
-	g_instance->m_thread = CreateThread(nullptr, 0, ServiceWorkerThread, nullptr, 0, nullptr);
+	service._thread = CreateThread(nullptr, 0, ServiceWorkerThread, &service, 0, nullptr);
 
-	if (!g_instance->m_thread.IsValid())
+	if (!service._thread.IsValid())
 	{
 		LOGD << L"CreateThread failed!";
 		return;
 	}
 
 	LOGD << L"Service started!";
-	g_instance->m_thread.Wait();
+	service._thread.Wait();
 	LOGD << L"Stop signaled";
 
-	g_instance->UpdateStatus(SERVICE_STOPPED);
+	service.UpdateStatus(SERVICE_STOPPED);
 
 	LOGD << L"Exit";
 }
 
-void WINAPI ExampleService::ServiceControlHandler(DWORD requestCode)
+// https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex
+DWORD WINAPI ExampleService::ServiceHandler(DWORD requestCode, DWORD, void*, void* context)
 {
 	LOGD << L"Enter";
-	assert(g_instance);
+
+	auto service = reinterpret_cast<ExampleService*>(context);
+
+	_ASSERT(service);
 
 	switch (requestCode)
 	{
@@ -139,28 +142,35 @@ void WINAPI ExampleService::ServiceControlHandler(DWORD requestCode)
 		{
 			LOGD << L"SERVICE_CONTROL_STOP requested";
 
-			if (g_instance->m_serviceStatus.dwCurrentState != SERVICE_RUNNING)
+			if (service->_status.dwCurrentState != SERVICE_RUNNING)
 			{
-				break;
+				return ERROR_SERVICE_NOT_ACTIVE;
 			}
 
-			g_instance->UpdateStatus(SERVICE_STOP_PENDING, NO_ERROR, 10000);
-			g_instance->m_serviceStopEvent.Set();
-			break;
+			service->UpdateStatus(SERVICE_STOP_PENDING, NO_ERROR, 10000);
+			service->_stopEvent.Set();
+			return NO_ERROR;
+		}
+		case SERVICE_CONTROL_INTERROGATE:
+		{
+			return NO_ERROR;
 		}
 	}
 
-	LOGD << L"Exit";
+	return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
-DWORD WINAPI ExampleService::ServiceWorkerThread(void*)
+DWORD WINAPI ExampleService::ServiceWorkerThread(void* context)
 {
 	using namespace std::chrono_literals;
 
 	LOGD << L"Enter";
-	assert(g_instance);
 
-	while (g_instance->m_serviceStopEvent.Wait(5000ms) != WAIT_OBJECT_0)
+	auto service = reinterpret_cast<ExampleService*>(context);
+
+	_ASSERT(service);
+
+	while (service->_stopEvent.Wait(5000ms) != WAIT_OBJECT_0)
 	{
 		LOGD << "Working...";
 		// TODO: add code your service functionality here!

@@ -5,7 +5,7 @@
 
 ## Debugging:
 
-- Start Visual Studio with administrator privileges
+- Start Visual Studio with administrator privileges... if you dare
 - Make sure ``DebugBreak()`` call exists in main() function
 - Run ``EnableDebug.cmd`` in the project folder
 	- Example: ``EnableDebug.cmd X:\Full\Path\To\ExampleService.exe``

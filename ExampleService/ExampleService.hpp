@@ -1,12 +1,13 @@
 #pragma once
 
-#include <Windows.h>
-#include <array>
 #include "../ExampleSharedCode/AutoHandle.hpp"
 
 class ExampleService
 {
 public:
+	static DWORD Start();
+
+private:
 	ExampleService();
 	ExampleService(const ExampleService&) = delete;
 	ExampleService(ExampleService&&) = delete;
@@ -14,21 +15,17 @@ public:
 	ExampleService& operator = (ExampleService&&) = delete;
 	~ExampleService();
 
-	DWORD Start();
-
-private:
 	bool IsPendingOperation();
 	bool CanAcceptStop();
 
 	void UpdateStatus(DWORD currentState, DWORD exitCode = NO_ERROR, DWORD waitHint = 0);
 
 	static void WINAPI ServiceMain(DWORD, LPWSTR*);
-	static void WINAPI ServiceControlHandler(DWORD);
+	static DWORD WINAPI ServiceHandler(DWORD, DWORD, void*, void*);
 	static DWORD WINAPI ServiceWorkerThread(void*);
 
-	wchar_t m_serviceName[15] = L"ExampleService";
-	SERVICE_STATUS m_serviceStatus = { };
-	ExampleSharedCode::ServiceStatusHandle m_statusHandle;
-	ExampleSharedCode::EventHandle m_serviceStopEvent;
-	ExampleSharedCode::ThreadHandle m_thread;
+	SERVICE_STATUS _status = { SERVICE_WIN32_OWN_PROCESS, 0, 0, 0, 0, 0, 0 };
+	ExampleSharedCode::ServiceStatusHandle _statusHandle;
+	ExampleSharedCode::EventHandle _stopEvent;
+	ExampleSharedCode::ThreadHandle _thread;
 };
