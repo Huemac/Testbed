@@ -38,6 +38,6 @@ namespace Timing
 		Duration Elapsed() const;
 		~Timer();
 	private:
-		const std::chrono::high_resolution_clock::time_point m_start = std::chrono::high_resolution_clock::now();
+		const std::chrono::high_resolution_clock::time_point _start = std::chrono::high_resolution_clock::now();
 	};
 }

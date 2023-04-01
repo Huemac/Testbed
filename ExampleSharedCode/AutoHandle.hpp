@@ -24,7 +24,7 @@ namespace ExampleSharedCode
 
 		bool IsValid() const
 		{
-			return m_handle != Invalid;
+			return _handle != Invalid;
 		}
 
 		// Can't get this templated
@@ -33,10 +33,10 @@ namespace ExampleSharedCode
 	protected:
 		void Exhange(T handle)
 		{
-			if (m_handle != handle)
+			if (_handle != handle)
 			{
 				Close();
-				std::exchange(m_handle, handle);
+				std::exchange(_handle, handle);
 			}
 		}
 
@@ -44,19 +44,19 @@ namespace ExampleSharedCode
 		{
 		}
 
-		T m_handle = Invalid;
+		T _handle = Invalid;
 
 	private:
 		void Close()
 		{
 			if (IsValid())
 			{
-				m_deleter(m_handle);
-				m_handle = Invalid;
+				_deleter(_handle);
+				_handle = Invalid;
 			}
 		}
 
-		DeleteFunction m_deleter;
+		DeleteFunction _deleter;
 	};
 
 	struct HandleDeleter
@@ -84,12 +84,12 @@ namespace ExampleSharedCode
 
 		inline DWORD Wait(MilliSeconds timeout = MilliSeconds(INFINITE))
 		{
-			return WaitForSingleObject(m_handle, timeout.count());
+			return WaitForSingleObject(_handle, timeout.count());
 		}
 
 		inline bool Set()
 		{
-			return SetEvent(m_handle);
+			return SetEvent(_handle);
 		}
 	};
 
@@ -103,7 +103,7 @@ namespace ExampleSharedCode
 
 		inline DWORD Wait(MilliSeconds timeout = MilliSeconds(INFINITE))
 		{
-			return WaitForSingleObject(m_handle, timeout.count());
+			return WaitForSingleObject(_handle, timeout.count());
 		}
 	};
 
@@ -117,7 +117,7 @@ namespace ExampleSharedCode
 
 		inline bool SetStatus(LPSERVICE_STATUS status)
 		{
-			return SetServiceStatus(m_handle, status);
+			return SetServiceStatus(_handle, status);
 		}
 	};
 
@@ -131,12 +131,12 @@ namespace ExampleSharedCode
 
 		inline bool Write(LPCVOID buffer, DWORD numberOfBytesToWrite, LPDWORD numberOfBytesWritten, LPOVERLAPPED overlapped)
 		{
-			return WriteFile(m_handle, buffer, numberOfBytesToWrite, numberOfBytesWritten, overlapped);
+			return WriteFile(_handle, buffer, numberOfBytesToWrite, numberOfBytesWritten, overlapped);
 		}
 
 		inline bool Read(LPVOID buffer, DWORD numberOfBytesToRead, LPDWORD numberOfBytesRead, LPOVERLAPPED overlapped)
 		{
-			return ReadFile(m_handle, buffer, numberOfBytesToRead, numberOfBytesRead, overlapped);
+			return ReadFile(_handle, buffer, numberOfBytesToRead, numberOfBytesRead, overlapped);
 		}
 	};
 }
