@@ -4,47 +4,183 @@
 #pragma comment(lib, "ComCtl32.lib")
 #pragma comment(lib, "Gdiplus.lib")
 
-namespace
-{
 #ifndef _WIN64
-	ULONG_PTR g_gdiPlusToken = 0;
+using GdiPlusToken = ULONG_PTR;
 #else	
-	UINT_PTR g_gdiPlusToken = 0;
+using GdiPlusToken = UINT_PTR;
 #endif
+
+class Logger : public std::stringstream
+{
+public:
+	Logger() :
+		std::stringstream()
+	{
+		*this << std::chrono::system_clock::now() << ' ';
+	}
 	
-	UINT g_elapsedTime = 0;
-	UINT_PTR g_timer = 0;
-
-	constexpr float pi = 3.14159265358979323846f;
-
-	inline BYTE FunkyColor(int offset)
+	~Logger()
 	{
-		return static_cast<BYTE>(std::sin(0.01f * g_elapsedTime + offset) * 127 + 128);
+		const std::string& message = str();
+		OutputDebugStringA(message.c_str());
+	}
+};
+
+std::ostream& operator << (std::ostream& os, const Gdiplus::RectF& r)
+{
+	return os << r.X << ", " << r.Y << ", " << r.Width << ", " << r.Height;
+}
+
+class ScreenSaver
+{
+public:
+	ScreenSaver(HWND window) :
+		_window(window)
+	{
+		Gdiplus::GdiplusStartupInput gdiPlusStartupInput;
+		Gdiplus::GdiplusStartup(&_token, &gdiPlusStartupInput, nullptr);
+
+		constexpr UINT framesPerSecond = 60;
+		constexpr UINT interval = 1000 / framesPerSecond;
+		_timer = SetTimer(window, 1, interval, nullptr);
+
+		Logger() << "Created\n";
 	}
 
-	inline Gdiplus::SolidBrush BackgroundBrush()
+	~ScreenSaver()
 	{
-		return Gdiplus::SolidBrush({ FunkyColor(0), FunkyColor(2), FunkyColor(4) });
+		_bitmap.reset();
+
+		if (_timer)
+		{
+			KillTimer(_window, _timer);
+			_timer = 0;
+		}
+
+		if (_token)
+		{
+			Gdiplus::GdiplusShutdown(_token);
+			_token = 0;
+		}
+
+		Logger() << "Destroyed\n";
 	}
 
-	inline Gdiplus::PointF Position(const RECT& paintArea)
+	uint8_t FunkyByte(uint8_t offset) const
+	{
+		float derp = std::sinf(0.01f * _elapsedTime + offset);
+		return static_cast<uint8_t>(derp * 0x80 + 0x7F);
+	}
+
+	Gdiplus::ARGB FunkyColor() const
+	{
+		return Gdiplus::Color::MakeARGB(0xFF, FunkyByte(0), FunkyByte(2), FunkyByte(4));
+	}
+
+	Gdiplus::PointF TextPosition(const RECT& paintArea) const
 	{
 		float canvasWidth = float(paintArea.right - paintArea.left);
 		float canvasHeight = float(paintArea.bottom - paintArea.top);
 
-		float width = canvasWidth / 2;
-		float height = canvasHeight / 2;
-		float radius = min(canvasWidth, canvasHeight) / 3;
+		Gdiplus::PointF position(
+			(canvasWidth - _textRect.Width) / 2,
+			(canvasHeight - _textRect.Height) / 2);
 
-		float degrees = float(g_elapsedTime % 360);
-		float radians = degrees * (pi / 180.0f);
+		float radius = min(position.X, position.Y);
 
-		float x = width + radius * std::sin(radians);
-		float y = height - radius * std::cos(radians);
+		float delay = 50.0f;
 
-		return { x, y };
+		position.X += radius * std::sinf(_elapsedTime / delay);
+		position.Y -= radius * std::cosf(_elapsedTime / delay);
+
+		return position;
 	}
-}
+
+	void MeasureText(std::wstring_view text, const Gdiplus::Font& font)
+	{
+		Gdiplus::Graphics graphics(_window);
+
+		graphics.MeasureString(
+			text.data(),
+			static_cast<INT>(text.size()),
+			&font,
+			Gdiplus::PointF(),
+			&_textRect);
+	}
+
+	void Resize(WORD screenWidth, WORD screenHeight)
+	{
+		const float fontSize = std::abs(screenWidth - screenHeight) / 2.0f;
+		const Gdiplus::Font font(L"Segoe", fontSize, Gdiplus::FontStyleBold, Gdiplus::UnitPixel);
+		const std::wstring message = L"Example!";
+
+		MeasureText(message, font);
+
+		Logger() << "Resized\n"
+			<< "\tScreen width: " << screenWidth << "px\n"
+			<< "\tScreen height: " << screenHeight << "px\n"
+			<< "\tFont size: " << fontSize << "px\n"
+			<< "\tText rectangle: " << _textRect << '\n';
+
+		_bitmap = std::make_unique<Gdiplus::Bitmap>(
+			static_cast<INT>(_textRect.Width),
+			static_cast<INT>(_textRect.Height));
+
+		Gdiplus::Graphics graphics(_bitmap.get());
+
+		graphics.SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
+
+		const Gdiplus::SolidBrush textBrush(Gdiplus::Color(255, 255, 255));
+
+		graphics.DrawString(
+			message.c_str(),
+			static_cast<int>(message.size()),
+			&font,
+			_textRect,
+			nullptr,
+			&textBrush);
+	}
+
+	void Update()
+	{
+		++_elapsedTime;
+
+		_backgroundColor.SetValue(FunkyColor());
+
+		InvalidateRect(_window, nullptr, false);
+	}
+
+	void Paint()
+	{
+		HDC hdc = BeginPaint(_window, &ps);
+
+		Gdiplus::Graphics graphics(hdc);
+		graphics.Clear(_backgroundColor);
+
+		if (_bitmap)
+		{
+			Gdiplus::PointF position = TextPosition(ps.rcPaint);
+
+			graphics.DrawImage(_bitmap.get(), position);
+		}
+	
+		EndPaint(_window, &ps);
+	}
+
+private:
+	const HWND _window;
+	UINT_PTR _timer = 0;
+	WORD _elapsedTime = 0;
+
+	PAINTSTRUCT ps;
+	GdiPlusToken _token = 0;
+	Gdiplus::Color _backgroundColor;
+	Gdiplus::RectF _textRect;
+
+	std::unique_ptr<Gdiplus::Bitmap> _bitmap;
+};
+
+std::unique_ptr<ScreenSaver> screenSaver;
 
 BOOL WINAPI ScreenSaverConfigureDialog(HWND, UINT, WPARAM, LPARAM)
 {
@@ -56,83 +192,45 @@ BOOL WINAPI RegisterDialogClasses(HANDLE)
 	return TRUE;
 }
 
-void Paint(HWND window)
-{
-	PAINTSTRUCT ps = { 0 };
-	const HDC hdc = BeginPaint(window, &ps);
-
-	Gdiplus::Bitmap bitmap(ps.rcPaint.right, ps.rcPaint.bottom);
-	Gdiplus::Graphics buffer(&bitmap);
-
-	const Gdiplus::SolidBrush backgroundBrush = BackgroundBrush();
-	buffer.FillRectangle(
-		&backgroundBrush,
-		static_cast<int>(ps.rcPaint.left),
-		static_cast<int>(ps.rcPaint.top),
-		static_cast<int>(ps.rcPaint.right),
-		static_cast<int>(ps.rcPaint.bottom));
-
-	const float fontSize = (ps.rcPaint.bottom - ps.rcPaint.top) / 12.0f;
-	const Gdiplus::Font font(L"Segoe", fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-	Gdiplus::PointF position = Position(ps.rcPaint);
-	const static Gdiplus::SolidBrush textBrush({ 255, 255, 255 });
-
-	// buffer.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias); Does not work with text
-	buffer.SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
-
-	const std::wstring message = L"Example!";
-	buffer.DrawString(message.c_str(), static_cast<int>(message.size()), &font, position, &textBrush);
-
-	Gdiplus::Graphics graphics(hdc);
-	graphics.DrawImage(&bitmap, static_cast<int>(ps.rcPaint.left), static_cast<int>(ps.rcPaint.top));
-
-	EndPaint(window, &ps);
-}
-
 LRESULT WINAPI ScreenSaverProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 		case WM_CREATE:
 		{
-			Gdiplus::GdiplusStartupInput gdiPlusStartupInput;
-			Gdiplus::GdiplusStartup(&g_gdiPlusToken, &gdiPlusStartupInput, nullptr);
-
-			constexpr UINT framesPerSecond = 60;
-			g_timer = SetTimer(window, 1, 1000 / framesPerSecond, nullptr);
-			break;
-		}
-		case WM_TIMER:
-		{
-			++g_elapsedTime;
-			InvalidateRect(window, nullptr, false);
-			break;
-		}
-		case WM_PAINT:
-		{
-			Paint(window);
+			_ASSERTE(!screenSaver);
+			screenSaver = std::make_unique<ScreenSaver>(window);
 			break;
 		}
 		case WM_DESTROY:
 		{
-			if (g_timer)
-			{
-				KillTimer(window, g_timer);
-			}
-
-			if (g_gdiPlusToken)
-			{
-				Gdiplus::GdiplusShutdown(g_gdiPlusToken);
-			}
-
-			PostQuitMessage(0);
+			_ASSERTE(screenSaver);
+			screenSaver.reset();
 			break;
 		}
-		default:
+		case WM_SIZE:
 		{
-			return DefScreenSaverProc(window, message, wParam, lParam);
+			_ASSERTE(screenSaver);
+			screenSaver->Resize(LOWORD(lParam), HIWORD(lParam));
+			break;
+		}
+		case WM_ERASEBKGND:
+		{
+			return TRUE;
+		}
+		case WM_PAINT:
+		{
+			_ASSERTE(screenSaver);
+			screenSaver->Paint();
+			break;
+		}
+		case WM_TIMER:
+		{
+			_ASSERTE(screenSaver);
+			screenSaver->Update();
+			break;
 		}
 	}
 
-	return EXIT_SUCCESS;
+	return DefScreenSaverProc(window, message, wParam, lParam);
 }
