@@ -10,6 +10,7 @@ using GdiPlusToken = ULONG_PTR;
 using GdiPlusToken = UINT_PTR;
 #endif
 
+#ifdef _DEBUG
 class Logger : public std::stringstream
 {
 public:
@@ -25,6 +26,17 @@ public:
 		OutputDebugStringA(message.c_str());
 	}
 };
+#else
+class Logger
+{
+public:
+	template <typename T>
+	Logger& operator << (T)
+	{
+		return *this;
+	}
+};
+#endif
 
 std::ostream& operator << (std::ostream& os, const Gdiplus::RectF& r)
 {
@@ -68,13 +80,33 @@ public:
 
 	uint8_t FunkyByte(uint8_t offset) const
 	{
-		float derp = std::sinf(0.01f * _elapsedTime + offset);
-		return static_cast<uint8_t>(derp * 0x80 + 0x7F);
+		float rads = (0.01f * _elapsed) + (offset << 1);
+		float factor = std::abs(std::sinf(rads));
+		return static_cast<uint8_t>(factor * 0xFF);
 	}
 
-	Gdiplus::ARGB FunkyColor() const
+	uint32_t FunkyColor() const
 	{
-		return Gdiplus::Color::MakeARGB(0xFF, FunkyByte(0), FunkyByte(2), FunkyByte(4));
+		struct ColorBGRA
+		{
+			uint8_t Blue;
+			uint8_t Green;
+			uint8_t Red;
+			uint8_t Alpha;
+		};
+
+		union Color
+		{
+			uint32_t Value;
+			ColorBGRA Components;
+		} color;
+
+		color.Components.Alpha = 0xFF;
+		color.Components.Red = FunkyByte(0);
+		color.Components.Green = FunkyByte(1);
+		color.Components.Blue = FunkyByte(2);
+
+		return color.Value;
 	}
 
 	Gdiplus::PointF TextPosition(const RECT& paintArea) const
@@ -90,8 +122,8 @@ public:
 
 		float delay = 50.0f;
 
-		position.X += radius * std::sinf(_elapsedTime / delay);
-		position.Y -= radius * std::cosf(_elapsedTime / delay);
+		position.X += radius * std::sinf(_elapsed / delay);
+		position.Y -= radius * std::cosf(_elapsed / delay);
 
 		return position;
 	}
@@ -143,7 +175,7 @@ public:
 
 	void Update()
 	{
-		++_elapsedTime;
+		++_elapsed;
 
 		_backgroundColor.SetValue(FunkyColor());
 
@@ -152,27 +184,32 @@ public:
 
 	void Paint()
 	{
-		HDC hdc = BeginPaint(_window, &ps);
+		HDC hdc = BeginPaint(_window, &_paint);
 
 		Gdiplus::Graphics graphics(hdc);
 		graphics.Clear(_backgroundColor);
 
 		if (_bitmap)
 		{
-			Gdiplus::PointF position = TextPosition(ps.rcPaint);
+			Gdiplus::PointF position = TextPosition(_paint.rcPaint);
 
-			graphics.DrawImage(_bitmap.get(), position);
+			Gdiplus::CachedBitmap cached(_bitmap.get(), &graphics);
+
+			graphics.DrawCachedBitmap(&cached,
+				static_cast<INT>(position.X),
+				static_cast<INT>(position.Y));
+
 		}
 	
-		EndPaint(_window, &ps);
+		EndPaint(_window, &_paint);
 	}
 
 private:
 	const HWND _window;
 	UINT_PTR _timer = 0;
-	WORD _elapsedTime = 0;
+	DWORD _elapsed = 0;
 
-	PAINTSTRUCT ps;
+	PAINTSTRUCT _paint;
 	GdiPlusToken _token = 0;
 	Gdiplus::Color _backgroundColor;
 	Gdiplus::RectF _textRect;
@@ -184,11 +221,13 @@ std::unique_ptr<ScreenSaver> screenSaver;
 
 BOOL WINAPI ScreenSaverConfigureDialog(HWND, UINT, WPARAM, LPARAM)
 {
+	Logger() << "ScreenSaverConfigureDialog\n";
 	return FALSE;
 }
 
 BOOL WINAPI RegisterDialogClasses(HANDLE)
 {
+	Logger() << "RegisterDialogClasses\n";
 	return TRUE;
 }
 
