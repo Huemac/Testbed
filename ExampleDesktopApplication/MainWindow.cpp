@@ -4,14 +4,35 @@
 
 namespace Example
 {
-	inline BYTE FunkyColor(int offset, UINT elapsedTime)
+	BYTE FunkyByte(UINT elapsed, BYTE offset)
 	{
-		return static_cast<BYTE>(std::sin(0.01 * elapsedTime + offset) * 127 + 128);
+		float rads = (0.01f * elapsed) + (offset << 1);
+		float factor = std::abs(std::sinf(rads));
+		return static_cast<uint8_t>(factor * 0xFF);
 	}
 
-	inline COLORREF FunkyColor(UINT elapsedTime)
+	DWORD FunkyColor(UINT elapsed)
 	{
-		return RGB(FunkyColor(0, elapsedTime), FunkyColor(2, elapsedTime), FunkyColor(4, elapsedTime));
+		struct ColorBGRA
+		{
+			uint8_t Blue;
+			uint8_t Green;
+			uint8_t Red;
+			uint8_t Alpha;
+		};
+
+		union Color
+		{
+			uint32_t Value;
+			ColorBGRA Components;
+		} color;
+
+		color.Components.Alpha = 0x00;
+		color.Components.Red = FunkyByte(elapsed, 0);
+		color.Components.Green = FunkyByte(elapsed, 1);
+		color.Components.Blue = FunkyByte(elapsed, 2);
+
+		return color.Value;
 	}
 
 	MainWindow::MainWindow(HINSTANCE instance) :
